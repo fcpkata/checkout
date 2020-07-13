@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CheckoutAcceptanceTest {
 
-	private final String URI = "http://localhost:8090/v1/invoice";
+	private final String URI = "http://checkout/v1/invoice";
 
 	@Test
 	public void shouldCreateInvoiceForValidBookId() throws Exception {
