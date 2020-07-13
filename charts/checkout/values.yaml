@@ -56,9 +56,9 @@ resources:
     cpu: 500m
     memory: 512Mi
   requests:
-    cpu: 400m
+    cpu: 50m
     memory: 512Mi
-probePath: /actuator/health
+probePath: /getCheckout
 livenessProbe:
   initialDelaySeconds: 60
   periodSeconds: 10
