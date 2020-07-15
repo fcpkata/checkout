@@ -1,5 +1,6 @@
 package com.checkout.controller;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,11 @@ public class CheckoutController {
 	}
 
 	@PostMapping(value = "/invoice", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Order> createInvoice(@RequestBody InvoiceRequest request) {
+	public ResponseEntity<Order> createInvoice(@RequestBody InvoiceRequest request) throws IOException {
 
 		CatalogResponse product = checkoutService.catalogLookupForProduct(request.getBookId());
-		Optional<Order> orderDetails = checkoutService.createInvoice(request, product);
-		return orderDetails.map(order -> new ResponseEntity<Order>(order, HttpStatus.OK))
-				.orElse(new ResponseEntity<Order>(HttpStatus.BAD_REQUEST));
+		Optional<Order> order = checkoutService.createInvoice(request, product);
+		return order.map(orderDetails -> new ResponseEntity<>(orderDetails, HttpStatus.OK))
+				.orElse(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 	}
 }

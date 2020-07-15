@@ -1,10 +1,8 @@
 package com.checkout.acceptance;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.RestTemplate;
 
 import com.checkout.model.InvoiceRequest;
@@ -29,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CheckoutAcceptanceTest {
 
-	private final String URI = "http://checkout/v1/invoice";
+	private final String URI = "http://localhost:8080/v1/invoice";
 
 	@Test
 	public void shouldCreateInvoiceForValidBookId() throws Exception {
@@ -53,8 +51,7 @@ public class CheckoutAcceptanceTest {
 
 	}
 
-	@Test
-	@Ignore("Need to check")
+	@Test(expected = BadRequest.class)
 	public void shouldThrowExceptionIfInValidBookId() throws Exception {
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -68,10 +65,8 @@ public class CheckoutAcceptanceTest {
 		HttpEntity<InvoiceRequest> entity = new HttpEntity<>(request, requestHeaders);
 		RestTemplate restTemplate = new RestTemplate();
 
-		ResponseEntity<Order> result = restTemplate.exchange(URI, HttpMethod.POST, entity, Order.class);
+		restTemplate.exchange(URI, HttpMethod.POST, entity, Order.class);
 
-		log.info(">>>>>>>>>>>>>>> "+result.getStatusCode());
-		assertEquals(result.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

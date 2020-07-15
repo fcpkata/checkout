@@ -1,5 +1,6 @@
 package com.checkout.services;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 
@@ -9,6 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.checkout.model.CatalogResponse;
@@ -29,7 +32,7 @@ public class CheckoutService {
 		this.orderRepository = orderRepository;
 	}
 
-	public CatalogResponse catalogLookupForProduct(String productId) {
+	public CatalogResponse catalogLookupForProduct(String productId) throws IOException {
 
 		String uri = "http://catalog/catalog/v1/product/";
 		HttpHeaders headers = new HttpHeaders();
@@ -37,24 +40,29 @@ public class CheckoutService {
 
 		HttpEntity<Object> httpEntity = new HttpEntity<Object>(headers);
 		RestTemplate inventoryRestTemplate = new RestTemplate();
-		ResponseEntity<CatalogResponse> response = inventoryRestTemplate.exchange(uri + productId, HttpMethod.GET,
-				httpEntity, CatalogResponse.class);
-		log.info("CatalogResponse >>>>> " + response.getBody());
-		return response.getBody();
+		ResponseEntity<CatalogResponse> response = null;
+		try {
+			response = inventoryRestTemplate.exchange(uri + productId, HttpMethod.GET, httpEntity,
+					CatalogResponse.class);
+			return response.getBody();
+		} catch (RuntimeException e) {
+			if (e instanceof HttpClientErrorException) {
+				return new CatalogResponse();
+			}
+			throw e;
+		}
+
 	}
 
 	public Optional<Order> createInvoice(InvoiceRequest request, CatalogResponse product) {
-
-		Optional<Order> order = orderRepository.fetchOrderByProductId(product.getId());
-		if (order.isPresent()) {
-			return order;
-		} else {
+		Optional<Order> orderResponse = Optional.empty();
+		if (!StringUtils.isEmpty(product.getId())) {
 			Order newOrder = Order.builder().Id(generateOrderId()).productId(product.getId())
 					.itemName(product.getName()).customerName(request.getCustomerName()).price(product.getPrice())
 					.billingAddress(request.getShippingAddress()).build();
-			return orderRepository.saveOrder(newOrder);
+			orderResponse = orderRepository.saveOrder(newOrder);
 		}
-
+		return orderResponse;
 	}
 
 	private String generateOrderId() {

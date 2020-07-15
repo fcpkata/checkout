@@ -14,11 +14,6 @@ public class OrderRepository implements Repository {
 	private static List<Order> orders = new ArrayList<>();
 
 	@Override
-	public Optional<Order> fetchOrderByProductId(String productId) {
-		return orders.stream().filter(order -> order.getProductId().equals(productId)).findFirst();
-	}
-
-	@Override
 	public Optional<Order> saveOrder(Order order) {
 		orders.add(order);
 		return Optional.of(order);
