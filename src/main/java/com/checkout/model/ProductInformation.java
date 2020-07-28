@@ -9,14 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Order {
+public class ProductInformation {
 	
-	private String Id;
-	private String productId;
-	private String itemName;
-	private String customerName;
-	private double price;
-	private ShippingAddress billingAddress;
-	
+	private String sellerId;
+	private Item item;
 
 }

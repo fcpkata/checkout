@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.checkout.model.CatalogResponse;
 import com.checkout.model.InvoiceRequest;
 import com.checkout.model.Order;
 import com.checkout.services.CheckoutService;
@@ -30,10 +30,11 @@ public class CheckoutController {
 
 	@PostMapping(value = "/invoice", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Order> createInvoice(@RequestBody InvoiceRequest request) throws IOException {
-
-		CatalogResponse product = checkoutService.catalogLookupForProduct(request.getBookId());
-		Optional<Order> order = checkoutService.createInvoice(request, product);
-		return order.map(orderDetails -> new ResponseEntity<>(orderDetails, HttpStatus.OK))
-				.orElse(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+		Optional<Order> order = checkoutService.createInvoice(request);
+		if (order.isPresent()) {
+			return new ResponseEntity<>(order.get(), HttpStatus.OK);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ID");
+		}
 	}
 }

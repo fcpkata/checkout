@@ -1,68 +1,53 @@
 package com.checkout.services;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.checkout.model.CatalogResponse;
+import com.checkout.model.InventoryResponse;
 import com.checkout.model.InvoiceRequest;
 import com.checkout.model.Order;
+import com.checkout.model.ProductInformation;
 import com.checkout.repositories.OrderRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
+
+@Service
 public class CheckoutService {
 
 	private OrderRepository orderRepository;
+	private RestTemplate restTemplate;
 
-	@Autowired
-	public CheckoutService(OrderRepository orderRepository) {
+	public CheckoutService(OrderRepository orderRepository, RestTemplate restTemplate) {
 		this.orderRepository = orderRepository;
+		this.restTemplate = restTemplate;
 	}
 
-	public CatalogResponse catalogLookupForProduct(String productId) throws IOException {
-
-		String uri = "http://catalog/catalog/v1/product/";
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Content-Type", "application/json");
-
-		HttpEntity<Object> httpEntity = new HttpEntity<Object>(headers);
-		RestTemplate inventoryRestTemplate = new RestTemplate();
-		ResponseEntity<CatalogResponse> response = null;
-		try {
-			response = inventoryRestTemplate.exchange(uri + productId, HttpMethod.GET, httpEntity,
-					CatalogResponse.class);
-			return response.getBody();
-		} catch (RuntimeException e) {
-			if (e instanceof HttpClientErrorException) {
-				return new CatalogResponse();
-			}
-			throw e;
-		}
-
-	}
-
-	public Optional<Order> createInvoice(InvoiceRequest request, CatalogResponse product) {
+	public Optional<Order> createInvoice(InvoiceRequest request, ProductInformation product) {
 		Optional<Order> orderResponse = Optional.empty();
-		if (!StringUtils.isEmpty(product.getId())) {
-			Order newOrder = Order.builder().Id(generateOrderId()).productId(product.getId())
-					.itemName(product.getName()).customerName(request.getCustomerName()).price(product.getPrice())
+		if (!StringUtils.isEmpty(product.getItem().getProductId())) {
+			Order newOrder = Order.builder().Id(generateOrderId()).productId(product.getItem().getProductId())
+					.itemName(product.getItem().getProductId()).customerName(request.getCustomerName()).price(product.getItem().getShippingPrice())
 					.billingAddress(request.getShippingAddress()).build();
 			orderResponse = orderRepository.saveOrder(newOrder);
 		}
 		return orderResponse;
+	}
+	
+	public ProductInformation callInventoryService(String productId) {
+		String uri = System.getProperty("inventoryService");
+		ResponseEntity<InventoryResponse> product = restTemplate.getForEntity(uri + "/item/"+productId, InventoryResponse.class);
+		if(product.getStatusCodeValue() == HttpStatus.NOT_FOUND.value()) 
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Product Id");
+		return product.getBody().getProductInformation().get(0);
 	}
 
 	private String generateOrderId() {
@@ -70,6 +55,11 @@ public class CheckoutService {
 		int ordSuffix = random.nextInt(100);
 		return "ORD" + ordSuffix;
 
+	}
+
+	public Optional<Order> createInvoice(InvoiceRequest request) {
+		ProductInformation catalogLookupForProduct = callInventoryService(request.getBookId());
+		return createInvoice(request, catalogLookupForProduct);
 	}
 
 }
