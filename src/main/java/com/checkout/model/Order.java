@@ -16,6 +16,7 @@ public class Order {
 	private String itemName;
 	private String customerName;
 	private double price;
+	private double shippingPrice;
 	private ShippingAddress billingAddress;
 	
 

@@ -68,7 +68,7 @@ public class CheckoutControllerTest {
 
 	private Optional<Order> mockOrder() {
 		ShippingAddress address = new ShippingAddress("firstName", "lastName", "address1", "city", "provinceCode", "countryCode", "phone", "zip");
-		Order order = new Order("1", "PD001", "itemName", "customerName", 100.00, address);
+		Order order = new Order("1", "PD001", "itemName", "customerName", 100.00, 50.00, address);
 		return Optional.of(order);
 	}
 }
