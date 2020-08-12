@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,7 @@ public class CheckoutController {
 		this.checkoutService = checkoutService;
 	}
 
-	@PostMapping(value = "/invoice", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/invoice")
 	public ResponseEntity<Order> createInvoice(@RequestBody InvoiceRequest request) throws IOException {
 		Optional<Order> order = checkoutService.createInvoice(request);
 		if (order.isPresent()) {

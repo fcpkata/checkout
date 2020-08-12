@@ -1,10 +1,28 @@
 package com.checkout.acceptance;
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
-//@AutoConfigureMockMvc
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
+
+import com.checkout.model.InvoiceRequest;
+import com.checkout.model.Order;
+import com.checkout.model.ShippingAddress;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class CheckoutAcceptanceTest {
-/*
+
 	private final String URI = "http://localhost:8080/v1/invoice";
 
 	@Test
@@ -29,7 +47,7 @@ public class CheckoutAcceptanceTest {
 
 	}
 
-	@Test(expected = BadRequest.class)
+	@Test
 	public void shouldThrowExceptionIfInValidBookId() throws Exception {
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -43,8 +61,10 @@ public class CheckoutAcceptanceTest {
 		HttpEntity<InvoiceRequest> entity = new HttpEntity<>(request, requestHeaders);
 		RestTemplate restTemplate = new RestTemplate();
 
-		restTemplate.exchange(URI, HttpMethod.POST, entity, Order.class);
+		ResponseEntity<Order> responseEntity = restTemplate.exchange(URI, HttpMethod.POST, entity, Order.class);
+		
+		assertThat(responseEntity.getStatusCodeValue()).isEqualTo(204);
 
 	}
-*/
+
 }

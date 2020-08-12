@@ -14,5 +14,5 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InventoryResponse {
-	private List<ProductInformation> productInformation;
+	private List<ProductInformation> productInformations;
 }

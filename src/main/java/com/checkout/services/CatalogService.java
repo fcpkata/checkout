@@ -17,7 +17,7 @@ public class CatalogService {
 	}
 
 	public Product callCatalogService(String productId, String uri) {
-		ResponseEntity<Product> product = restTemplate.getForEntity(uri + productId, Product.class);
+		ResponseEntity<Product> product = restTemplate.getForEntity(uri+"/catalog/v1/products/" + productId, Product.class);
 		return product.getBody();
 	}
 
